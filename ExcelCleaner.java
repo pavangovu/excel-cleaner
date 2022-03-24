@@ -13,7 +13,7 @@ public class ExcelCleaner {
 		
 		//List<String[]> cellValues = extractInfo(new File("C:\\workspace2\\Tools\\src\\com\\ericsson\\utran\\tools\\intern\\info.xlsx"));
 
-		Map<String, List<List<Cell>>> complete_Raw = extractInfo_Raw(new File("C:\\workspace2\\Tools\\src\\com\\ericsson\\utran\\tools\\intern\\info.xlsx"));
+		Map<String, List<List<Cell>>> complete_Raw = extractInfo_Raw(new File("C:\\workspace2\\Tools\\src\\com\\ericsson\\utran\\tools\\intern\\ISF117033_LTE_RND_T-Mobile_RND_CIQ_MMBB_02142022.xlsx"));
 		//List<List<List<Cell>>> complete_Raw = extractInfo_Raw(new File("C:\\workspace2\\Tools\\src\\com\\ericsson\\utran\\tools\\intern\\info.xlsx"));
 		
 		//Print Cell Data to Console
