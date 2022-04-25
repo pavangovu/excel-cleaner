@@ -1,21 +1,25 @@
 package com.ericsson.utran.tools.intern;
 
-import java.io.*;
-import java.util.*;
 
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelCleaner {
 
 	public static boolean clean(String input)
 	{
 		
-		return false;
+                    
+		return false; //preserve false for now
 	}
 	
-    public static void main(String[] args) {
-
+	//main used for local testing purposes only
+    public static void main(String[] args) 
+    {
+    	String inputFile = "C:\\Users\\egovpav\\OneDrive - Ericsson\\Ericsson\\WashingtonDCXMLIssue\\InputCIQ\\ISF117033_LTE_RND_T-Mobile_RND_CIQ_MMBB_02142022.xlsx";
+    	clean(inputFile);
+    }
+    
+    public static void deprecatedCleaner()
+    {
         //Create an ArrayList to store the data read from excel file
         ArrayList<ArrayList<Object>> data = new ArrayList<>();
 
