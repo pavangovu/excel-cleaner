@@ -21,10 +21,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
+import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -35,7 +45,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ericsson.utran.tools.GlobalConst;
-import com.ericsson.utran.tools.intern.ExcelCleaner;
 import com.ericsson.utran.tools.tmo_ericsson.TMOConstants;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -422,6 +431,63 @@ public class CSVUtils
 		}
 		return isSheetExists;
 	}
+	
+	/**
+	 * [egovpav]
+	 * Low-memory, stax-parser alternative to checkIfsheetExistsInExcel()
+	 * @param ciqFile
+	 * @param sheetName
+	 * @return
+	 */
+	public static boolean checkIfsheetExistsInExcel_STAX (File ciqFile, String target) {
+		try {
+			OPCPackage opcpackage = OPCPackage.open(ciqFile);
+			
+			PackagePart workbookpart = opcpackage.getPartsByName(Pattern.compile("/xl/workbook.xml")).get(0);
+			
+			XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(workbookpart.getInputStream());
+			
+			List<String> sheetNames = new ArrayList<>();
+			
+			String sheetName = "";
+			
+			while(reader.hasNext()) {
+				XMLEvent event = (XMLEvent)reader.next();
+				
+				if(event.isStartElement()) {
+					StartElement startElement = (StartElement)event;
+					QName startElementName = startElement.getName();
+					
+					//start element of sheet definition
+					if(startElementName.getLocalPart().equalsIgnoreCase("sheet")) {
+						Attribute attribute = startElement.getAttributeByName(new QName("name"));
+						sheetName = attribute.getValue();
+					    sheetNames.add(sheetName);
+					}
+					
+				}
+			}
+			
+			opcpackage.close();
+			
+			System.out.println("Sheet names: ");
+			for(String shName: sheetNames) {
+				System.out.println("Sheet name: " + shName);
+			}
+			
+			//return value
+			if(sheetNames.contains(target))
+				return true;
+			else
+				return false;
+		}
+		
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return false; //default return value, false until proven otherwise
+	}
 
 	/**
 	 * Create a mapping between index of the column in a CSV file to the column name
@@ -485,30 +551,6 @@ public class CSVUtils
 			gmoLogger.printError("Construct CSVReader exception! " + e.getMessage());
 		}
 		return csvReader;
-	}
-	
-	/*
-	 * [egovpav]
-	 * [19 April 2022]
-	 * 
-	 * Remove excess columns and excess rows from .xlsx file
-	 * 
-	 * @param inputFile - input xlsx file
-	 * @return result (if successful, path to cleaned file. Otherwise, return inputFile)
-	 */
-	
-	public static String cleanExcel(String inputFile)
-	{
-		File input = new File(inputFile);
-		String parentPath = input.getParent();
-		String fileName = input.getName();
-		
-		boolean result = ExcelCleaner.clean(inputFile);
-		
-		if(result==true)
-			return parentPath+"\\Cleaned\\"+fileName;	//path to cleaned file
-		
-		return inputFile;
 	}
 
 	/**
